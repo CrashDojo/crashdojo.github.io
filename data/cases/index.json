@@ -1,0 +1,142 @@
+[
+ {
+  "id": "eval150_146_idm",
+  "dataset": "nuScenes",
+  "planner": "IDM",
+  "family": "C1",
+  "family_name": "Lead-vehicle braking",
+  "mechanism": "Lead vehicle decelerating",
+  "first_contact_s": 3.0,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_146_pdm_closed",
+  "dataset": "nuScenes",
+  "planner": "PDM-Closed",
+  "family": "C1",
+  "family_name": "Lead-vehicle braking",
+  "mechanism": "Lead vehicle decelerating",
+  "first_contact_s": null,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_013_diffusion_planner",
+  "dataset": "nuPlan",
+  "planner": "Diffusion Planner",
+  "family": "C2",
+  "family_name": "Adjacent-lane cut-in",
+  "mechanism": "Same-direction lane change",
+  "first_contact_s": 2.5,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_013_flow_planner",
+  "dataset": "nuPlan",
+  "planner": "Flow Planner",
+  "family": "C2",
+  "family_name": "Adjacent-lane cut-in",
+  "mechanism": "Same-direction lane change",
+  "first_contact_s": 3.3,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_013_idm",
+  "dataset": "nuPlan",
+  "planner": "IDM",
+  "family": "C2",
+  "family_name": "Adjacent-lane cut-in",
+  "mechanism": "Same-direction lane change",
+  "first_contact_s": 2.2,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_013_pdm_closed",
+  "dataset": "nuPlan",
+  "planner": "PDM-Closed",
+  "family": "C2",
+  "family_name": "Adjacent-lane cut-in",
+  "mechanism": "Same-direction lane change",
+  "first_contact_s": null,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_071_flow_planner",
+  "dataset": "nuPlan",
+  "planner": "Flow Planner",
+  "family": "C2",
+  "family_name": "Adjacent-lane cut-in",
+  "mechanism": "Same-direction lane change",
+  "first_contact_s": 5.2,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_010_flow_planner",
+  "dataset": "nuPlan",
+  "planner": "Flow Planner",
+  "family": "C3A",
+  "family_name": "Partial lane intrusion",
+  "mechanism": "Same-direction drift",
+  "first_contact_s": 3.0,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_068_flow_planner",
+  "dataset": "nuPlan",
+  "planner": "Flow Planner",
+  "family": "C3A",
+  "family_name": "Partial lane intrusion",
+  "mechanism": "Same-direction drift",
+  "first_contact_s": 2.4,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_126_flow_planner",
+  "dataset": "nuScenes",
+  "planner": "Flow Planner",
+  "family": "C3A",
+  "family_name": "Partial lane intrusion",
+  "mechanism": "Same-direction drift",
+  "first_contact_s": 2.7,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_048_idm",
+  "dataset": "nuPlan",
+  "planner": "IDM",
+  "family": "C4",
+  "family_name": "Crossing conflict",
+  "mechanism": "Straight crossing paths",
+  "first_contact_s": 3.2,
+  "overall": "pass"
+ },
+ {
+  "id": "eval150_005_diffusion_planner",
+  "dataset": "nuPlan",
+  "planner": "Diffusion Planner",
+  "family": "C4",
+  "family_name": "Crossing conflict",
+  "mechanism": "Straight crossing paths",
+  "first_contact_s": 5.4,
+  "overall": "pass"
+ },
+ {
+  "id": "full1514_extra_0507_idm",
+  "dataset": "nuPlan",
+  "planner": "IDM",
+  "family": "C5",
+  "family_name": "Merge into a common lane",
+  "mechanism": "Turn into path",
+  "first_contact_s": 6.0,
+  "overall": "fail"
+ },
+ {
+  "id": "full1514_extra_0828_flow_planner",
+  "dataset": "nuPlan",
+  "planner": "Flow Planner",
+  "family": "C5",
+  "family_name": "Merge into a common lane",
+  "mechanism": null,
+  "first_contact_s": 4.6,
+  "overall": "unknown"
+ }
+]

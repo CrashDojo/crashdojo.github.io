@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CrashDojo: Accident-Grounded World Models as Closed-Loop Safety Examiners for Autonomous Driving Planners</title>
+<meta name="description" content="CrashDojo turns accident knowledge into traceable, closed-loop challenges for autonomous-driving planners.">
+<meta property="og:title" content="CrashDojo — Accident-Grounded World Models as Closed-Loop Safety Examiners">
+<meta property="og:image" content="media/teaser.png">
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,300..800&family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=54">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="nav-progress" aria-hidden="true"><i></i></div>
+  <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>CrashDojo</a>
+  <nav class="nav-links">
+    <a href="#method">Method</a>
+    <a href="#mechanisms">Examples</a>
+    <a href="#results">Results</a>
+    <a href="#ablation">Ablation</a>
+    <a href="#vlm">Check</a>
+    <a href="#cite">Cite</a>
+  </nav>
+  <a class="nav-cta" href="#" data-todo="paper">Paper ↗</a>
+</header>
+
+<main id="main">
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <p class="eyebrow"><span class="live-dot"></span>AUTONOMOUS DRIVING · SAFETY EVALUATION</p>
+    <h1>Crash<em class="grad">Dojo</em></h1>
+    <p class="subtitle">Accident-Grounded World Models as Closed-Loop<br class="br-lg"> Safety Examiners for Autonomous Driving Planners</p>
+    <p class="lede">Who should initiate the risk, what should it do, and how hard should it push?
+      CrashDojo answers all three, then lets the ego planner fight back.</p>
+    <div class="authors">
+      <p class="author-list">
+        <span>Bowen Jing<sup>1*</sup></span><span>Haoyun Tang<sup>2*</sup></span><span>Ruiyang Hao<sup>3</sup></span>
+        <span>Chenchen Ge<sup>4</sup></span><span>Weitao Zhou<sup>5</sup></span><span>Haibao Yu<sup>6†</sup></span>
+      </p>
+      <p class="affil-list">
+        <span><sup>1</sup>Tuojing AI</span><span><sup>2</sup>Xi'an Jiaotong University</span><span><sup>3</sup>King's College London</span>
+        <span><sup>4</sup>Southeast University</span><span><sup>5</sup>Beijing Simple AI Technology</span><span><sup>6</sup>The University of Hong Kong</span>
+      </p>
+      <p class="role-note"><span>* Equal contribution</span><span>† Corresponding author</span></p>
+    </div>
+    <ul class="logo-row" aria-label="Affiliations">
+        <li class="logo logo--tuojing" title="Tuojing AI"><img src="media/affiliations/tuojing.webp" alt="Tuojing AI"></li>
+        <li class="logo logo--xjtu" title="Xi'an Jiaotong University"><img src="media/affiliations/xjtu.webp" alt="Xi'an Jiaotong University"></li>
+        <li class="logo logo--kcl" title="King's College London"><img src="media/affiliations/kcl.webp" alt="King's College London"></li>
+        <li class="logo logo--seu" title="Southeast University"><img src="media/affiliations/seu.webp" alt="Southeast University"></li>
+        <li class="logo logo--simpleai" title="Beijing Simple AI Technology"><img src="media/affiliations/simpleai.webp" alt="Beijing Simple AI Technology"></li>
+        <li class="logo logo--hku" title="The University of Hong Kong"><img src="media/affiliations/hku.webp" alt="The University of Hong Kong"></li>
+    </ul>
+    <div class="cta-row">
+      <a class="btn btn-pill" href="#" data-todo="paper"><span>Read the paper</span><i aria-hidden="true">↗</i></a>
+      <a class="btn btn-pill" href="https://github.com/HaoyunT/CrashDojo" target="_blank" rel="noopener"><span>Code</span><i aria-hidden="true">↗</i></a>
+    </div>
+  </div>
+  <div class="hero-legend">
+    <span><i class="sw ego"></i>Ego planner</span>
+    <span><i class="sw tgt"></i>Selected target</span>
+    <span><i class="sw bg"></i>Other vehicles</span>
+    <span class="muted">Schematic cut-in · loop</span>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats" aria-label="Key numbers">
+  <p class="stats-scope"><span>4,000 closed-loop rollouts</span><span>200 scenes</span><span>nuScenes + nuPlan</span><span>5 ego planners</span><span>5 accident mechanisms</span></p>
+  <div class="stats-grid">
+    <div class="stat stat--lead">
+      <b data-to="1.8" data-dec="1" data-suf="×">1.8×</b>
+      <span class="stat-k">initial-target contact vs SAFE&#8209;SIM</span>
+      <span class="stat-src">nuScenes · learning-based planners · 20.5% vs 11.5%</span>
+    </div>
+    <div class="stat">
+      <b data-to="47.5" data-dec="1" data-pre="−" data-suf="%">−47.5%</b>
+      <span class="stat-k">target–background contact</span>
+      <span class="stat-src">nuPlan · learning-based · 10.50% vs 20.00%</span>
+    </div>
+    <div class="stat">
+      <b data-to="72" data-dec="0" data-pre="−" data-suf="%">−72%</b>
+      <span class="stat-k">target body off-road</span>
+      <span class="stat-src">nuPlan · learning-based · 1.11% vs 3.97%</span>
+    </div>
+    <div class="stat">
+      <b data-to="3.0" data-dec="1" data-suf="×">3.0×</b>
+      <span class="stat-k">target contact vs a random actor</span>
+      <span class="stat-src">component study · Diffusion Planner · 23.0% vs 7.7%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEASER ============ -->
+<section class="teaser-sec">
+  <div class="wrap wrap--wide">
+    <div class="teaser-head">
+      <p class="teaser-cap">Recorded rollouts for the five request families, played on a shared clock (10 Hz). Each panel stops at the first ego–target contact.</p>
+      <a class="chip" href="media/teaser.gif" download="crashdojo-teaser.gif">Download GIF ↓</a>
+    </div>
+    <figure class="teaser">
+      <img src="media/teaser.gif" alt="Five recorded CrashDojo rollouts playing in sync: lead braking, cut-in, partial intrusion, crossing and merge, each ending in first target contact" loading="lazy">
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ABSTRACT ============ -->
+<section class="section" id="overview">
+  <div class="wrap">
+    <div class="sec-rule"><span class="sec-num">00</span><span class="sec-label">Abstract</span></div>
+    <div class="two-col">
+    <div>
+      <h2>A collision objective<br>is <em>not</em> a test.</h2>
+    </div>
+    <div class="prose">
+      <p class="tldr">CrashDojo picks <b>who</b> should cause the conflict, <b>what</b> maneuver it performs and <b>how hard</b> it pushes — from accident evidence — and then steers a frozen traffic world model to carry it out while the ego planner reacts.</p>
+      <details class="more"><summary>Read the full abstract</summary>
+      <p>Evaluating autonomous-driving planners requires safety-critical traffic interactions that are rarely encountered in recorded data. Guided traffic generators can induce collisions and adapt to ego responses, but a collision objective alone does not fully specify the interaction being tested: which actor initiates the conflict, what maneuver it performs, and how strongly it intervenes. Accident evidence can inform these choices, yet closed-loop execution introduces a further challenge: fixed trajectories cannot adapt to the ego response, while unconstrained replanning may alter the intended maneuver and its timing.</p>
+      <p>We present CrashDojo, which connects accident-grounded interaction selection to persistent request-guided control of a frozen traffic world model. Road structure, participant roles, and accident evidence rank candidate actor–mechanism requests, fixing the selected actor, maneuver parameters, and timing before rollout. Geometry-specific objectives guide target motion on the original request clock, while contextual motion references and observed ego–target proximity modulate contact pressure during execution. Candidate checks assess executable trajectory prefixes.</p>
+      <p>Across five planners on 100 nuScenes and 100 nuPlan scenes, CrashDojo matches or exceeds SAFE-SIM in initial-target contact in three of four dataset–planner groups while reducing target–background contact and target body off-road rates in all four. Motion-distribution comparisons and a separate three-seed component study further characterize the generated encounters.</p>
+    </details>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ THREE QUESTIONS ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">01</span><span class="sec-label">Motivation</span></div>
+      <h2>Every crash test hides<br><em>three choices.</em></h2>
+    </div>
+    <div class="q-grid">
+      <article class="q-card">
+        <span class="q-num">WHO</span>
+        <h3>Which vehicle initiates the conflict?</h3>
+        <p>The actor must be able to cause this kind of crash: same lane, adjacent lane, or a crossing route.</p>
+      </article>
+      <article class="q-card">
+        <span class="q-num">WHAT</span>
+        <h3>What behavior does it execute?</h3>
+        <p>An accident type becomes concrete targets: a lateral shift, a speed goal, an intrusion depth.</p>
+      </article>
+      <article class="q-card">
+        <span class="q-num">HOW HARD</span>
+        <h3>How strongly should it intervene?</h3>
+        <p>Driving logs set the intensity; pressure adapts online as the ego responds.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section class="section" id="method">
+  <div class="wrap">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">02</span><span class="sec-label">Method</span></div>
+      <h2>From accident context<br>to a <em>planner challenge.</em></h2>
+      <p class="section-lede">Fix the request offline. Guide it online, re-querying the ego planner every 0.5 s.</p>
+    </div>
+
+    <figure class="paper-fig">
+      <img src="media/fig1-dark.png?v=3" alt="Figure 1: (a) select the risk initiator, (b) specify and scale intervention, (c) examine the ego planner in closed loop" loading="lazy">
+      <figcaption><span class="fig-tag">Fig. 1</span> (a) Select an actor and fix its mechanism/request parameters. (b) Guide its motion using pair geometry and contextual strength. (c) Execute the interaction and observe the ego response. Schematic.</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-i">a</span>
+        <h3>Lexicographic actor selection</h3>
+        <p>Seven ordered checks rank each actor–mechanism candidate. Geometry never outweighs weaker accident evidence.</p>
+      </div>
+      <div class="step">
+        <span class="step-i">b</span>
+        <h3>Geometry-specific references</h3>
+        <p>Each mechanism has its own geometric target, followed on a fixed request clock.</p>
+      </div>
+      <div class="step">
+        <span class="step-i">c</span>
+        <h3>Frozen flow-matching world model</h3>
+        <p>The generator is never retrained; guidance acts only at sampling time.</p>
+      </div>
+    </div>
+
+    <figure class="paper-fig">
+      <img src="media/fig2-dark.png?v=3" alt="Figure 2: the CrashDojo framework — offline actor–mechanism request and contextual prior; online geometric guidance and pressure modulation in a closed loop" loading="lazy">
+      <figcaption><span class="fig-tag">Fig. 2</span> Offline: fix the request and prior. Online: guide, execute five frames, observe, repeat every 0.5 s. Schematic.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ MECHANISMS ============ -->
+<section class="section dark-band" id="mechanisms">
+  <div class="wrap wrap--wide">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">03</span><span class="sec-label">Closed-Loop Examples</span></div>
+      <h2>Watch the examiner<br><em>build a crash.</em></h2>
+      <p class="section-lede">Seven recorded rollouts across five crash types, replayed from the stored logs.</p>
+    </div>
+
+    <div class="lab">
+      <aside class="lab-cases" id="lab-cases" aria-label="Choose a case"></aside>
+
+      <div class="lab-main">
+        <ol class="lab-steps" id="lab-steps">
+          <li data-s="1"><span class="n">1</span><b>Select the actor</b><small>seven-check, evidence-ordered ranking</small></li>
+          <li data-s="2"><span class="n">2</span><b>Request the conflict</b><small>mechanism template + guided plans</small></li>
+          <li data-s="3"><span class="n">3</span><b>Modulate pressure</b><small>λ<sub>t</sub> re-weighted every 0.5 s</small></li>
+        </ol>
+        <div class="lab-stage">
+          <canvas id="lab-canvas" aria-label="Replay of the selected rollout"></canvas>
+          <div class="lab-hud" id="lab-hud"></div>
+          <div class="lab-legend">
+            <span><i class="sw ego"></i>Ego</span><span><i class="sw tgt"></i>Selected target</span><span><i class="sw bg"></i>Other vehicles</span>
+            <span><i class="ln plan"></i>Guided plans</span><span><i class="ln req"></i>Requested route / corridor</span>
+          </div>
+        </div>
+        <div class="lab-timeline">
+          <button class="chip" id="lab-play">Ⅱ Pause</button>
+          <div class="seg small" id="lab-speed"><button data-v="0.5">0.5×</button><button class="on" data-v="1">1×</button><button data-v="2">2×</button></div>
+          <div class="lab-scrub"><canvas id="lab-strip"></canvas><input type="range" id="lab-range" min="0" max="1000" value="0" aria-label="Time"></div>
+        </div>
+      </div>
+
+      <div class="lab-panel" id="lab-panel"></div>
+    </div>
+
+    <div class="cmp">
+      <div class="cmp-head">
+        <div>
+          <h3 class="cmp-title">One cut-in request, four ego planners</h3>
+        </div>
+        <p class="muted small cmp-note">Same scene, same target, same request — different planners.</p>
+      </div>
+      <div class="cmp-grid" id="cmp-grid"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section class="section" id="results">
+  <div class="wrap">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">04</span><span class="sec-label">Main Results</span></div>
+      <h2>Same pressure.<br>Less <em>collateral.</em></h2>
+      <p class="section-lede">4 generators × 5 planners × 200 scenes.</p>
+    </div>
+
+    <div class="headline">
+      <figure class="paper-fig axis-fig">
+        <img src="media/fig-two-axis-dark.png?v=3" alt="Collision challenge versus reasonableness: CrashDojo at 100.00, 98.65; SAFE-SIM 75.90, 74.25; CCDiff-DDPM 32.95, 0.00; CCDiff-FM 18.29, 34.96" loading="lazy">
+        <figcaption><span class="fig-tag">Fig. 3</span><b>Collision challenge vs. reasonableness</b> — higher is better on both axes.</figcaption>
+      </figure>
+      <div class="headline-notes">
+        <div class="abl-note"><b>3 of 4</b><span>groups: target contact ≥ SAFE-SIM</span></div>
+        <div class="abl-note"><b>4 of 4</b><span>groups: less collateral contact and off-road</span></div>
+        <div class="abl-note"><b>20.5% vs 11.5%</b><span>target contact, nuScenes, learning-based planners</span></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="seg" id="seg-data">
+        <button class="on" data-v="nuPlan">nuPlan</button>
+        <button data-v="nuScenes">nuScenes</button>
+      </div>
+      <div class="seg" id="seg-class">
+        <button class="on" data-v="learn">Learning-based planners</button>
+        <button data-v="rule">Rule-based planners</button>
+      </div>
+    </div>
+
+    <div class="chart-grid" id="charts"></div>
+
+    <details class="table-wrap">
+      <summary>Full table — 9 metrics <span class="muted">(click to expand)</span></summary>
+      <div class="table-scroll"><table id="full-table"></table></div>
+    </details>
+
+    <p class="note">★ / bold = best per column within a planner class. Ego CR: ego contact with any vehicle. Target CR: contact with the initially selected target. Target–BG: target contact with other vehicles. Body OR: mean fraction of target frames with &gt;1% body off-road. Main comparison runs use seed 1.</p>
+  </div>
+</section>
+
+<!-- ============ ABLATION ============ -->
+<section class="section dark-band" id="ablation">
+  <div class="wrap">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">05</span><span class="sec-label">Component Study</span></div>
+      <h2>Pick the right actor.<br>Ask for the <em>right maneuver.</em></h2>
+      <p class="section-lede">Remove one design choice at a time. 100 scenes, three seeds.</p>
+    </div>
+
+    <div class="abl-grid">
+      <div class="abl-card">
+        <div class="abl-head">
+          <div class="seg small" id="seg-metric"><button class="on" data-v="cr">Target contact CR ↑</button><button data-v="rm">Motion discrepancy RM<sub>tgt</sub> ↓</button></div>
+          <div class="seg small" id="seg-abl"><button class="on" data-v="dp">Diffusion Planner</button><button data-v="idm">IDM</button></div>
+        </div>
+        <div id="abl-bars"></div>
+        <p class="abl-foot muted small">Mean ± sample s.d. over three seeds, n = 300 per cell. RM<sub>tgt</sub>: target acceleration/jerk histogram distance to a fixed real reference.</p>
+      </div>
+      <div class="abl-notes">
+        <div class="abl-note"><b>23.0% → 7.7%</b><span>target contact with a random actor instead</span></div>
+        <div class="abl-note"><b>+14.2% / +12.2%</b><span>higher motion discrepancy with generic guidance</span></div>
+        <div class="abl-note"><b>14.7% → 4.3%</b><span>target contact without guidance (IDM)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAKEAWAYS ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="sec-rule"><span class="sec-num">06</span><span class="sec-label">Notes on the Evaluation</span></div>
+    <div class="two-col">
+    <div>
+      <h2>Fine print,<br><em>up front.</em></h2>
+    </div>
+    <ul class="caveats">
+      <li>Ego contact with <em>any</em> vehicle is mixed per planner vs SAFE-SIM: 7 up, 1 tie, 2 down.</li>
+      <li>Main comparison: one seed. Component study: three seeds, separate cohort.</li>
+      <li>nuPlan adds a map/state adapter; 42 of 100 nuScenes requests use fallback geometry.</li>
+      <li>The VLM check has no human labels.</li>
+    </ul>
+  </div>
+  </div>
+</section>
+
+<!-- ============ PLAUSIBILITY CHECK (VLM) ============ -->
+<section class="section section--tight" id="vlm">
+  <div class="wrap">
+    <div class="sec-rule"><span class="sec-num">07</span><span class="sec-label">VLM Plausibility Screen</span></div>
+    <div class="pc">
+      <div class="pc-text">
+        <h2 class="pc-h">Do the crashes <em>look real?</em></h2>
+        <p class="pc-lede">A vision–language model (Qwen3-VL-32B) watches every clip and flags anything physically impossible — teleports, identity swaps, missing targets.</p>
+      </div>
+      <div class="pc-stats">
+        <div><b>48 / 48</b><span>clips judged physically plausible</span></div>
+        <div class="pc-note"><span class="pc-note-k">Constructed controls: planted faults are caught</span><span>An injected 11.9 m jump and a missing target are both flagged.</span><span class="pc-caveat">The model also receives the measurements that reveal these faults.</span></div>
+      </div>
+    </div>
+    <details class="pc-more">
+      <summary>See the six example clips and the model's reasons</summary>
+      <div class="vlm-grid" id="vlm-grid"></div>
+      <p class="note">Thumbnails are six-frame overviews; the model received the full 10 Hz clip plus numerical context. Reasons are shown with the paper's English abridgement and the model's original Chinese output.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ CITE ============ -->
+<section class="section section--cite" id="cite">
+  <div class="wrap">
+    <div class="sec-intro">
+      <div class="sec-rule"><span class="sec-num">08</span><span class="sec-label">BibTeX</span></div>
+      <h2>Cite <em>this work.</em></h2>
+    </div>
+    <div class="bib">
+      <button class="chip copy" id="copy-bib">Copy</button>
+<pre id="bibtex">@misc{jing2026crashdojo,
+  title  = {CrashDojo: Accident-Grounded World Models as Closed-Loop
+            Safety Examiners for Autonomous Driving Planners},
+  author = {Jing, Bowen and Tang, Haoyun and Hao, Ruiyang and
+            Ge, Chenchen and Zhou, Weitao and Yu, Haibao},
+  year   = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap foot-row">
+    <span class="brand"><span class="brand-mark" aria-hidden="true"></span>CrashDojo</span>
+    <nav class="foot-links" aria-label="Resources">
+      <a href="#" data-todo="paper">Paper ↗</a>
+      <a href="https://github.com/HaoyunT/CrashDojo" target="_blank" rel="noopener">Code ↗</a>
+      <a href="#cite">BibTeX</a>
+    </nav>
+    <span class="foot-copy">© 2026 The CrashDojo authors · Numbers and trajectories come from frozen per-rollout records; only the hero animation is illustrative.</span>
+  </div>
+</footer>
+
+<script src="app.js?v=41"></script>
+<script src="caselab.js?v=42"></script>
+</body>
+</html>

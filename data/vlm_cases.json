@@ -1,0 +1,255 @@
+{
+  "summary": {
+    "what": "A fixed VLM describes individual executed ego–target interactions. Each clip is rendered in a fixed world view (blue ego E, orange target T1, gray other vehicles, drivable-area mask) and given to the VLM together with code-computed measurements (box-overlap intervals, visible-frame counts, max adjacent-frame displacement). The VLM returns a label (reasonable / clearly anomalous / insufficient evidence) and a one-line reason naming time and vehicle; reasons are then checked against the supplied numbers. It is a traceable description alongside trajectory measurements, not an independent evaluator.",
+    "model": "Qwen3-VL-32B-Instruct (revision 0cfaf48183f594c31), BF16, greedy decoding, max 512 new tokens; one MP4 per clip at 10 Hz (100 frames nuScenes, 70 nuPlan)",
+    "prompt_gist": "Fixed Chinese instruction (SHA-256 prefix 42bcf582): two-line output, label + reason with time and vehicle. \"Clearly anomalous\" requires a locatable spatiotemporal contradiction; a never-visible target requires \"insufficient evidence\"; collision alone is not an anomaly; no judging displacement against unsupplied thresholds; no mechanism-match or responsibility judgment. Method names withheld; signals, right of way, lane direction, off-road and post-contact dynamics listed as unavailable.",
+    "headline_stats": [
+      {
+        "text": "12 illustrative cases (3 nuScenes, 9 nuPlan; five planners; four map regions); 10 with target contact",
+        "source": "CrashDojo_paper/sec/appendix_vlm.tex line 13"
+      },
+      {
+        "text": "36-case extension, family counts 8/8/8/2/4/6, 28 nuPlan / 8 nuScenes, 5 with target contact; 48 rollouts in total with 15 contacts",
+        "source": "CrashDojo_paper/sec/appendix_vlm.tex line 15"
+      },
+      {
+        "text": "All 48 original labels are \"reasonable\"",
+        "source": "CrashDojo_paper/sec/appendix_vlm.tex line 19"
+      },
+      {
+        "text": "18 of 36 extension reasons (50%) invoke a physical or normal range without a supplied threshold (an explanation-error count, not a rate of physically invalid trajectories)",
+        "source": "CrashDojo_paper/sec/appendix_vlm.tex line 17"
+      },
+      {
+        "text": "Controls: injected jump flagged as clearly anomalous at 0.7–0.8 s (supplied displacement 11.9 m); never-rendered target labelled insufficient evidence; continuous clip labelled reasonable",
+        "source": "CrashDojo_paper/sec/appendix_vlm.tex line 22; figures/tab_vlm_cases.tex lines 28–30"
+      }
+    ],
+    "caveats": "No independent human accuracy labels and no video-only/metadata-only comparisons. Measurements are VLM inputs, so a matching explanation shows consistency with supplied information, not independent recovery from video. Labels carry no accuracy or physical-validity interpretation (sec/appendix_vlm.tex lines 8, 19, 24).",
+    "language_note": "Raw outputs are Chinese; vlm_excerpt_zh is verbatim from responses.jsonl, vlm_excerpt_en_paper is the paper's abridged English translation.",
+    "notes": [
+      "The VLM saw MP4 videos; only six-frame overview JPGs of the same prepared cases are available locally, so the site images are overviews, not literal model input.",
+      "The final paper's per-case notes match data/vlm_classic12_20261110 (system instruction SHA-256 42bcf582…). data/vlm_classic5_20261110 is an earlier run with a different system instruction (28560ef5…) and is not used for excerpts.",
+      "Possible inconsistency: tab_vlm_cases.tex line 29 lists the injected-jump control as nuPlan / IDM, but the matching classic12 development response (11.911 m at 0.7–0.8 s) uses coordinates of the nuScenes scene of case a15857bf97086147d959. The extension36 control run reports 11.96 m in nuPlan coordinates. Not used as a showcase case.",
+      "trajectory_fact_check.json exists only for the earlier classic5 run; verdicts here use the paper footnotes and classic12 explanation_audit.json."
+    ]
+  },
+  "cases": [
+    {
+      "id": "a15857bf97086147d959",
+      "job_id": "eval150_146_idm",
+      "mechanism": "lead braking",
+      "family": "C1",
+      "planner": "IDM",
+      "dataset": "nuScenes",
+      "city": "singapore-hollandvillage",
+      "source_scope": "main_selected_cohort",
+      "figure_row": "a",
+      "frames": 100,
+      "overlap_s": "3.0–9.9",
+      "images": [
+        "media/vlm/lead_braking_nuscenes_idm.webp"
+      ],
+      "images_dark": [
+        "media/vlm/lead_braking_nuscenes_idm-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在t=3.0秒时首次发生车身矩形重叠，此后持续重叠至t=9.9秒末帧，期间两车位置变化连续，无可见位置跳变或身份错乱；相邻帧位移在0.1秒内均小于0.62米，符合10Hz采样下车辆运动的连续性，且无镜头切换或遮挡导致的观测缺失。",
+      "vlm_excerpt_en_paper": "E and T1 remain visible, with continuous recorded positions during overlap and no identity change.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "No explanation issue annotated in the paper for this case (paper: positive labels are case records, not accuracy or physical-validity evidence).",
+      "notes": "Shown in the paper (tab_vlm_cases, figure row a of fig:qualitative). The VLM reason also says adjacent displacements are below 0.62 m and calls this consistent with continuous motion at 10 Hz; the paper does not annotate this case.",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 10",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/a15857bf97086147d959/overview.jpg"
+      ]
+    },
+    {
+      "id": "b8038fc96925e448ff02",
+      "job_id": "eval150_071_flow_planner",
+      "mechanism": "adjacent-lane cut-in",
+      "family": "C2",
+      "planner": "Flow Planner",
+      "dataset": "nuPlan",
+      "city": "us-nv-las-vegas-strip",
+      "source_scope": "main_selected_cohort",
+      "figure_row": "b",
+      "frames": 70,
+      "overlap_s": "5.2–6.9",
+      "images": [
+        "media/vlm/cutin_nuplan_flow.webp"
+      ],
+      "images_dark": [
+        "media/vlm/cutin_nuplan_flow-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在t=5.2秒首次发生车身矩形重叠，此后持续重叠至t=6.9秒末帧，期间两车均保持连续、平滑的位移，无位置跳变或身份异常；相邻帧间最大位移（E在6.8–6.9秒间约1.005米，T1在0.2–0.3秒间约0.554米）均在正常车辆运动范围内，且无镜头或遮挡导致的可见性中断，交互过程时空连续自洽。",
+      "vlm_excerpt_en_paper": "Both vehicles continue moving during overlap, without a position jump or identity change.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "Explanation issue (paper footnote †, tab_vlm_cases.tex line 35): the explanation invokes a normal/acceptable motion range without a supplied physical threshold.",
+      "notes": "Figure row b of fig:qualitative. Its first contact time (5.2 s) equals the one in the main-text executed cut-in example (sec/5_experiments.tex line 38), but that they are the same rollout is not verified here.",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 13",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/b8038fc96925e448ff02/overview.jpg"
+      ]
+    },
+    {
+      "id": "fd1eecd1c599a52a17ad",
+      "job_id": "eval150_068_diffusion_planner",
+      "mechanism": "partial intrusion (C3A)",
+      "family": "C3A",
+      "planner": "Diffusion Planner",
+      "dataset": "nuPlan",
+      "city": "us-nv-las-vegas-strip",
+      "source_scope": "main_selected_cohort",
+      "figure_row": null,
+      "frames": 70,
+      "overlap_s": "3.3–6.9",
+      "images": [
+        "media/vlm/intrusion_nuplan_diffusion.webp"
+      ],
+      "images_dark": [
+        "media/vlm/intrusion_nuplan_diffusion-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在t=3.3秒首次发生车身矩形重叠，此后持续重叠至t=6.9秒末帧，期间两车均保持连续、平滑的运动轨迹，无位置跳变或身份异常；相邻帧位移在0.67米以内，符合10Hz采样下的正常车辆运动范围，且无镜头切换或遮挡导致的观测缺失。",
+      "vlm_excerpt_en_paper": "Both vehicles continue moving during overlap, without an identified position jump or identity change.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "Explanation issue (paper footnote ‡, tab_vlm_cases.tex line 36): the explanation states a 0.67 m displacement bound although the supplied target maximum is 0.698 m. explanation_audit.json additionally flags an unsupported normal-motion range.",
+      "notes": "This is the numerical-fidelity example discussed in sec/appendix_vlm.tex line 17.",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 17",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/fd1eecd1c599a52a17ad/overview.jpg"
+      ]
+    },
+    {
+      "id": "95175d3bbecbbd13c6cc",
+      "job_id": "remaining225_147_pdm_closed",
+      "mechanism": "intrusion with return (C3B)",
+      "family": "C3B",
+      "planner": "PDM-Closed",
+      "dataset": "nuPlan",
+      "city": "us-nv-las-vegas-strip",
+      "source_scope": "main_selected_cohort",
+      "figure_row": null,
+      "frames": 70,
+      "overlap_s": "none",
+      "images": [
+        "media/vlm/intrusion_return_nuplan_pdm.webp"
+      ],
+      "images_dark": [
+        "media/vlm/intrusion_return_nuplan_pdm-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在0.0–6.9秒全程均可见，无车身矩形重叠，中心距离最小值为4.189米（t=0.0s），最大值为100.895米（t=6.9s），无碰撞或接触事件。两车运动轨迹连续，相邻帧位移无突变（E最大相邻位移0.613米，T1最大1.489米），符合10Hz采样下的正常车辆运动连续性，无时空矛盾。",
+      "vlm_excerpt_en_paper": "Center distances are 4.189 m initially and 100.895 m at the end; both identities remain visible without overlap.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "No explanation issue annotated in the paper for this case (paper: positive labels are case records, not accuracy or physical-validity evidence).",
+      "notes": "No target contact; per the paper the return manoeuvre is not verified (sec/appendix_vlm.tex line 13). The raw reason also calls the displacements consistent with normal vehicle motion continuity; the paper does not annotate this case.",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 20",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/95175d3bbecbbd13c6cc/overview.jpg"
+      ]
+    },
+    {
+      "id": "048c2f5590e9cefd27ca",
+      "job_id": "eval150_048_idm",
+      "mechanism": "crossing",
+      "family": "C4",
+      "planner": "IDM",
+      "dataset": "nuPlan",
+      "city": "us-nv-las-vegas-strip",
+      "source_scope": "main_selected_cohort",
+      "figure_row": "d",
+      "frames": 70,
+      "overlap_s": "3.2–5.0",
+      "images": [
+        "media/vlm/crossing_nuplan_idm.webp"
+      ],
+      "images_dark": [
+        "media/vlm/crossing_nuplan_idm-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在t=3.2秒首次发生车身矩形重叠，此后持续重叠至t=5.0秒，期间两车均保持连续、平滑的位移，无位置跳变或身份异常；自车E在重叠后继续缓慢移动，T1持续向右前方行驶，相对运动在固定镜头下连续可核验，无时空矛盾。",
+      "vlm_excerpt_en_paper": "E continues moving slowly while T1 moves across the view, with continuous relative motion.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "No explanation issue annotated in the paper for this case (paper: positive labels are case records, not accuracy or physical-validity evidence).",
+      "notes": "Shown in the paper (figure row d of fig:qualitative).",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 22",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/048c2f5590e9cefd27ca/overview.jpg"
+      ]
+    },
+    {
+      "id": "e0ff916e52220a5e81f0",
+      "job_id": "full1514_extra_0507_idm",
+      "mechanism": "common-lane merge",
+      "family": "C5",
+      "planner": "IDM",
+      "dataset": "nuPlan",
+      "city": "us-nv-las-vegas-strip",
+      "source_scope": "additional_archived_merge_case",
+      "figure_row": "e",
+      "frames": 70,
+      "overlap_s": "6.0–6.9",
+      "images": [
+        "media/vlm/merge_nuplan_idm.webp"
+      ],
+      "images_dark": [
+        "media/vlm/merge_nuplan_idm-dark.webp"
+      ],
+      "image_note": "Six-frame overview (overview.jpg) of the prepared rendering for this case. The VLM itself received the full MP4 clip (all frames at 10 Hz) plus the numerical context; the MP4 is not available locally.",
+      "vlm_excerpt_zh": "自车E与目标车T1在t=6.0秒时首次发生车身矩形重叠，此后至t=6.9秒持续重叠，期间两车均保持连续运动，无位置跳变或身份异常；相邻帧位移在10 Hz采样下连续，且无镜头切换或遮挡导致的观测缺失，交互过程在可见范围内时空自洽。",
+      "vlm_excerpt_en_paper": "Both vehicles continue moving during overlap, without an identity change or visibility interruption.",
+      "fields": {
+        "label_zh": "合理",
+        "label_en": "Reasonable",
+        "output_format": "two lines: label + reason (no structured initiator/mechanism fields; the instruction requests no mechanism-match or responsibility judgment)"
+      },
+      "verdict": "No explanation issue annotated in the paper for this case (paper: positive labels are case records, not accuracy or physical-validity evidence).",
+      "notes": "Additional archived merge case outside the main benchmark (case_manifest source_scope additional_archived_merge_case); figure row e of fig:qualitative.",
+      "source_files": [
+        "CrashDojo_paper/figures/tab_vlm_cases.tex line 25",
+        "data/vlm_classic12_20261110/responses.jsonl",
+        "data/vlm_classic12_20261110/case_manifest.json",
+        "data/vlm_classic12_20261110/explanation_audit.json",
+        "outputs/vlm_interaction_20261109/extension12_20261110/v6/cases/e0ff916e52220a5e81f0/overview.jpg"
+      ]
+    }
+  ]
+}
